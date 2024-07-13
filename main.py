@@ -23,8 +23,12 @@ def fio_edit(contact):
 if __name__ == "__main__":
     contacts_list = get_data_from_csv("phonebook_raw.csv")
 
-    pattern = r"\(+7|8)?\s((\d(3)))\s(\d(3))[\s](\d(2))[\s](\d(2))"
-    phone_format = r"+7(\2)\3-\4-\5"
+    phone_pattern = r"\+?[7|8]\s*(\(*\d{3}\)*)\s*\-*(\d{3})\s*\-*(\d{2})\s*\-*(\d{2})"
+    secondary_phone_pattern = r"\s+(\d{4})"
+
+    phone_format_with_bracket = r"+7(\1)\2-\3-\4"
+    phone_format_no_bracket = r"+7\1\2-\3-\4"
+    secondary_phone_format = r"доб.\1"
 
     for contact in contacts_list[1:]:
         fio = fio_edit(contact)
@@ -32,3 +36,11 @@ if __name__ == "__main__":
         contact[1] = fio['firstname']
         contact[2] = fio['surname']
 
+        phone_result = re.search(phone_pattern, contact[5])
+        if phone_result is not None:
+            if "(" in phone_result.group():
+                contact[5] = re.sub(phone_pattern, phone_format_no_bracket, contact[5])
+            else:
+                contact[5] = re.sub(phone_pattern, phone_format_with_bracket, contact[5])
+            secondary_phone = re.sub(secondary_phone_pattern, secondary_phone_format, contact[5])
+            print(secondary_phone)
